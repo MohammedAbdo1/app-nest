@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id               Int      @id @default(autoincrement())
+  name             String   @db.VarChar(30) // Min 3 - Max 30 (يتم التحقق منه في الـ DTO)
+  email            String   @unique @db.VarChar(255) // البريد الإلكتروني يجب أن يكون فريدًا
+  password         String
+  role             Role     @default(User) // Enum لدور المستخدم
+  avatar           String?  // اختياري
+  age              Int?     // اختياري
+  phoneNumber      String?  @db.VarChar(11) // رقم الهاتف، يجب التحقق منه قبل الحفظ
+  address          String?  // العنوان اختياري
+  active           Boolean  @default(false) // الحالة افتراضيًا False
+  verificationCode String   // رمز التحقق
+  gender           Gender   // Enum للجنس
+  createdAt        DateTime @default(now()) // الطابع الزمني لإنشاء الحساب
+}
+model Category {
+  id               Int      @id @default(autoincrement())
+  name             String   @db.VarChar(100) 
+  image           String?
+  createdAt        DateTime @default(now()) 
+}
+
+enum Role {
+  Admin
+  User
+}
+
+enum Gender {
+  male
+  female
+}
+
