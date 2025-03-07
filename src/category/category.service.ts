@@ -1,26 +1,81 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma.service'; // تأكد من أن PrismaService موجود في المسار الصحيح
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoryService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  constructor(private prisma: PrismaService) {}
+
+  // إضافة فئة جديدة
+  async create(createCategoryDto: CreateCategoryDto) {
+    const { name, image } = createCategoryDto;
+    return await this.prisma.category.create({
+      data: {
+        name,
+        image,
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all category`;
+  // جلب جميع الفئات
+  async findAll() {
+    return await this.prisma.category.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  // جلب فئة واحدة حسب المعرف
+  async findOne(id: number) {
+    const category = await this.prisma.category.findUnique({
+      where: { id },
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+
+    return category;
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  // تحديث فئة حسب المعرف
+  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    const { name, image } = updateCategoryDto;
+
+    // تحقق من وجود الفئة أولاً
+    const category = await this.prisma.category.findUnique({
+      where: { id },
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+
+    // تحديث الفئة
+    return await this.prisma.category.update({
+      where: { id },
+      data: {
+        name,
+        image,
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  // حذف فئة
+  async remove(id: number) {
+    // تحقق من وجود الفئة أولاً
+    const category = await this.prisma.category.findUnique({
+      where: { id },
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+
+    // حذف الفئة
+    return await this.prisma.category.delete({
+      where: { id },
+    });
   }
 }
